@@ -1,4 +1,9 @@
 ---
+- name: Install lxml python module
+  apt:
+    name: python3-lxml
+    state: present
+
 - name: Create NiFi group
   group:
     name: "{{ nifi_group }}"

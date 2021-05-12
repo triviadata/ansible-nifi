@@ -69,6 +69,7 @@ zookeeper_myid: "{{ ansible_default_ipv4.address.split('.')[-1] }}"
 # Specify any property from zookeeper.properties here.
 zookeeper:
   dataDir: "{{ nifi_config_dirs.external_config }}/state/zookeeper"
+  clientPort: 2181
 
 # Specify ZooKeeper JAAS properties
 zookeeper_jaas: {}

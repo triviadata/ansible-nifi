@@ -1,12 +1,12 @@
 ---
 - name: Prepare system
-  include: prepare.yml
+  ansible.builtin.include_tasks: prepare.yml
 
 - name: Install NiFi
-  include: install.yml
+  ansible.builtin.include_tasks: install.yml
 
 - name: Customize NiFi
-  include: customize.yml
+  ansible.builtin.include_tasks: customize.yml
 
 - name: Run NiFi as system service
-  include: run.yml
+  ansible.builtin.include_tasks: run.yml

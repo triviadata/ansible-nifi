@@ -1,25 +1,27 @@
 ---
 - name: Create Zookeeper data directory
-  file:
+  ansible.builtin.file:
     path: "{{ zookeeper.dataDir }}"
     state: "directory"
     owner: "{{ nifi_user }}"
     group: "{{ nifi_group }}"
+    mode: "0755"
 
 - name: Create Zookeeper ID file
-  copy:
+  ansible.builtin.copy:
     content: "{{ zookeeper_myid }}"
     dest: "{{ zookeeper.dataDir }}/myid"
+    mode: "0644"
 
 - name: Update zookeeper.properties
   block:
     - name: Remove server line in zookeeper.properties
-      lineinfile:
+      ansible.builtin.lineinfile:
         state: absent
         path: "{{ nifi_config_dirs.home }}/conf/zookeeper.properties"
         regexp: "^server.*$"
     - name: Update config in zookeeper.properties
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: "{{ nifi_config_dirs.home }}/conf/zookeeper.properties"
         line: "{{ item.key }}={{ item.value }}"
         regexp: "^{{ item.key }}"

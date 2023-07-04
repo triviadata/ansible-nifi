@@ -1,85 +1,87 @@
 ---
 - name: Create shared resources directory
-  file:
+  ansible.builtin.file:
     path: "{{ nifi_config_dirs.external_config }}"
     state: "directory"
     owner: "{{ nifi_user }}"
     group: "{{ nifi_group }}"
+    mode: "0755"
 
 - name: Update nifi.properties
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "{{ nifi_config_dirs.home }}/conf/nifi.properties"
     line: "{{ item.key }}={{ item.value }}"
     regexp: "^{{ item.key }}="
   with_dict: "{{ nifi_properties }}"
 
 - name: Update bootstrap.conf
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "{{ nifi_config_dirs.home }}/conf/bootstrap.conf"
     line: "{{ item.key }}={{ item.value }}"
     regexp: "^{{ item.key }}="
   with_dict: "{{ bootstrap }}"
 
 - name: Update state-management.xml
-  xml:
+  community.general.xml:
     path: "{{ nifi_config_dirs.home }}/conf/state-management.xml"
     xpath: "{{ item.key }}"
     value: "{{ item.value }}"
   with_dict: "{{ state_management }}"
 
 - name: Update logback.xml
-  xml:
+  community.general.xml:
     path: "{{ nifi_config_dirs.home }}/conf/logback.xml"
     xpath: "{{ item.key }}"
     value: "{{ item.value }}"
   with_dict: "{{ logback }}"
 
 - name: Update login-identity-providers.xml
+  when: login_identity_providers['/loginIdentityProviders/provider/identifier'] | length
   block:
     - name: Uncomment block in login-identity-providers.xml
-      replace:
+      ansible.builtin.replace:
         path: "{{ nifi_config_dirs.home }}/conf/login-identity-providers.xml"
         regexp: "^.*To enable the {{ login_identity_providers['/loginIdentityProviders/provider/identifier'] }}.*$"
         replace: ""
     - name: Update properties in login-identity-providers.xml
-      xml:
+      community.general.xml:
         path: "{{ nifi_config_dirs.home }}/conf/login-identity-providers.xml"
         xpath: "{{ item.key }}"
         value: "{{ item.value }}"
       with_dict: "{{ login_identity_providers }}"
-  when: login_identity_providers['/loginIdentityProviders/provider/identifier'] | length
 
 - name: Update authorizers.xml
+  when: authorizers_identifiers | length
   block:
     - name: Uncomment block in authorizers.xml
-      replace:
+      ansible.builtin.replace:
         path: "{{ nifi_config_dirs.home }}/conf/authorizers.xml"
         regexp: "^.*To enable the {{ item }}.*$"
         replace: ""
       with_items: "{{ authorizers_identifiers }}"
     - name: Update properties in authorizers.xml
-      xml:
+      community.general.xml:
         path: "{{ nifi_config_dirs.home }}/conf/authorizers.xml"
         xpath: "{{ item.key }}"
         value: "{{ item.value }}"
       with_dict: "{{ authorizers }}"
-  when: authorizers_identifiers | length
 
 - name: Create Zookeeper JAAS configuration
-  template:
+  ansible.builtin.template:
     src: zookeeper-jaas.conf.j2
     dest: "{{ nifi_config_dirs.external_config }}/zookeeper-jaas.conf"
+    mode: "0644"
   when:
     - zookeeper_jaas | length
 
 - name: Prepare Zookeeper
-  include: zookeeper.yml
+  ansible.builtin.include_tasks: zookeeper.yml
   when:
     - nifi_properties['nifi.state.management.embedded.zookeeper.start'] is defined
     - nifi_properties['nifi.state.management.embedded.zookeeper.start'] | bool
 
 - name: Set NiFi variables in env.sh
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "{{ nifi_config_dirs.home }}/bin/nifi-env.sh"
     line: "{{ item.key }}={{ item.value }}"
     regexp: "^{{ item.key }}"

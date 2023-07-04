@@ -1,11 +1,12 @@
 ---
 - name: Download NiFi binary
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ download_mirror_uri }}/nifi/{{ nifi_version }}/nifi-{{ nifi_version }}-bin.zip"
     dest: "/tmp/nifi-{{ nifi_version }}-bin.zip"
+    mode: "0644"
 
 - name: Unpack NiFi binary
-  unarchive:
+  ansible.builtin.unarchive:
     remote_src: "yes"
     src: "/tmp/nifi-{{ nifi_version }}-bin.zip"
     dest: "{{ nifi_config_dirs.install }}/"
@@ -14,14 +15,14 @@
     creates: "{{ nifi_config_dirs.install }}/nifi-{{ nifi_version }}"
 
 - name: Fix permissions
-  file:
+  ansible.builtin.file:
     path: "{{ nifi_config_dirs.install }}/nifi-{{ nifi_version }}"
     owner: "{{ nifi_user }}"
     group: "{{ nifi_group }}"
     recurse: "yes"
 
 - name: Create NiFi symlink
-  file:
+  ansible.builtin.file:
     src: "nifi-{{ nifi_version }}"
     path: "{{ nifi_config_dirs.home }}"
     state: "link"
@@ -29,16 +30,18 @@
     group: "{{ nifi_group }}"
 
 - name: Create directories
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: "directory"
     owner: "{{ nifi_user }}"
     group: "{{ nifi_group }}"
+    mode: "0755"
   with_items:
     - "{{ nifi_config_dirs.run }}"
     - "{{ nifi_config_dirs.logs }}"
 
 - name: Set NiFi home
-  copy:
+  ansible.builtin.copy:
     dest: "/etc/profile.d/nifi-home.sh"
     content: "export NIFI_HOME={{ nifi_config_dirs.home }}"
+    mode: "0644"

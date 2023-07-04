@@ -1,6 +1,6 @@
 ---
 - name: Install lxml python module
-  apt:
+  ansible.builtin.package:
     name: python3-lxml
     state: present
 

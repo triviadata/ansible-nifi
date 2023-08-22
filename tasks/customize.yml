@@ -5,6 +5,7 @@
     line: "{{ item.key }}={{ item.value }}"
     regexp: "^{{ item.key }}="
   with_dict: "{{ nifi_properties }}"
+  notify: Restart NiFi
 
 - name: Update bootstrap.conf
   ansible.builtin.lineinfile:
@@ -12,6 +13,7 @@
     line: "{{ item.key }}={{ item.value }}"
     regexp: "^{{ item.key }}="
   with_dict: "{{ bootstrap }}"
+  notify: Restart NiFi
 
 - name: Update nifi-env.sh
   ansible.builtin.lineinfile:
@@ -19,6 +21,7 @@
     line: "export {{ item.key }}={{ item.value }}"
     regexp: "^export {{ item.key }}="
   with_dict: "{{ nifi_env }}"
+  notify: Restart NiFi
 
 - name: Update state-management.xml
   community.general.xml:
@@ -26,6 +29,7 @@
     xpath: "{{ item.key }}"
     value: "{{ item.value }}"
   with_dict: "{{ state_management }}"
+  notify: Restart NiFi
 
 - name: Update logback.xml
   community.general.xml:
@@ -33,6 +37,7 @@
     xpath: "{{ item.key }}"
     value: "{{ item.value }}"
   with_dict: "{{ logback }}"
+  notify: Restart NiFi
 
 - name: Update login-identity-providers.xml
   when: login_identity_providers['/loginIdentityProviders/provider/identifier'] | length
@@ -47,7 +52,9 @@
         path: "{{ nifi_config_dirs.home }}/conf/login-identity-providers.xml"
         xpath: "{{ item.key }}"
         value: "{{ item.value }}"
+        pretty_print: yes
       with_dict: "{{ login_identity_providers }}"
+      notify: Restart NiFi
 
 - name: Update authorizers.xml
   when: authorizers_identifiers | length
@@ -55,29 +62,23 @@
     - name: Uncomment block in authorizers.xml
       ansible.builtin.replace:
         path: "{{ nifi_config_dirs.home }}/conf/authorizers.xml"
-        regexp: "^.*To enable the {{ item }}.*$"
+        regexp: "^.*To enable the {{ authorizers['/authorizers/userGroupProvider/identifier'] }}.*$"
         replace: ""
-      with_items: "{{ authorizers_identifiers }}"
     - name: Update properties in authorizers.xml
       community.general.xml:
         path: "{{ nifi_config_dirs.home }}/conf/authorizers.xml"
         xpath: "{{ item.key }}"
         value: "{{ item.value }}"
+        pretty_print: yes
       with_dict: "{{ authorizers }}"
-
-- name: Create Zookeeper JAAS configuration
-  ansible.builtin.template:
-    src: zookeeper-jaas.conf.j2
-    dest: "{{ nifi_config_dirs.external_config }}/zookeeper-jaas.conf"
-    mode: "0644"
-  when:
-    - zookeeper_jaas | length
+      notify: Restart NiFi
 
 - name: Prepare Zookeeper
   ansible.builtin.include_tasks: zookeeper.yml
   when:
     - nifi_properties['nifi.state.management.embedded.zookeeper.start'] is defined
     - nifi_properties['nifi.state.management.embedded.zookeeper.start'] | bool
+  notify: Restart NiFi
 
 - name: Set NiFi variables in env.sh
   ansible.builtin.lineinfile:

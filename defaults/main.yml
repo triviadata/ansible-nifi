@@ -50,8 +50,8 @@ logback:
 # Specify any property from login-identity-providers.xml here.
 # Use XPath expressions as keys.
 login_identity_providers:
-  # Can be one of 'ldap-provider' or 'kerberos-provider'. Leave blank for no RBAC.
-  /loginIdentityProviders/provider/identifier: ""
+  /loginIdentityProviders/provider/identifier: single-user-provider
+  /loginIdentityProviders/provider/class: org.apache.nifi.authentication.single.user.SingleUserLoginIdentityProvider
 
 # Specify any property from state-management.xml here.
 # Use XPath expressions as keys.

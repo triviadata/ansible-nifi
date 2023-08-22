@@ -52,7 +52,7 @@
         path: "{{ nifi_config_dirs.home }}/conf/login-identity-providers.xml"
         xpath: "{{ item.key }}"
         value: "{{ item.value }}"
-        pretty_print: yes
+        pretty_print: true
       with_dict: "{{ login_identity_providers }}"
       notify: Restart NiFi
 
@@ -69,7 +69,7 @@
         path: "{{ nifi_config_dirs.home }}/conf/authorizers.xml"
         xpath: "{{ item.key }}"
         value: "{{ item.value }}"
-        pretty_print: yes
+        pretty_print: true
       with_dict: "{{ authorizers }}"
       notify: Restart NiFi
 

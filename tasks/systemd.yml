@@ -5,9 +5,8 @@
     dest: "/etc/systemd/system/nifi.service"
     mode: "0644"
 
-- name: Re/Start NiFi
-  ansible.builtin.service:
-    name: "nifi.service"
-    state: restarted
+- name: Enable NiFi service
+  ansible.builtin.systemd:
+    name: nifi
     daemon_reload: true
     enabled: true

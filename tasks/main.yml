@@ -8,5 +8,5 @@
 - name: Customize NiFi
   ansible.builtin.include_tasks: customize.yml
 
-- name: Run NiFi as system service
-  ansible.builtin.include_tasks: run.yml
+- name: Add NiFi as system service
+  ansible.builtin.include_tasks: systemd.yml

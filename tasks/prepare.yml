@@ -8,23 +8,29 @@
   ansible.builtin.group:
     name: "{{ nifi_group }}"
     state: "present"
-    system: "yes"
+    system: true
 
 - name: Create NiFi user
   ansible.builtin.user:
     name: "{{ nifi_user }}"
     groups: "{{ nifi_group }}"
-    append: "yes"
+    append: true
     state: "present"
     create_home: "no"
-    system: "yes"
+    system: true
 
-- name: Create directories
+- name: Create NiFi directories
   ansible.builtin.file:
-    path: "{{ item }}"
+    path: "{{ item.value }}"
     state: "directory"
     owner: "{{ nifi_user }}"
     group: "{{ nifi_group }}"
     mode: "0755"
-  with_items:
-    - "{{ nifi_config_dirs.install }}"
+  loop: "{{ nifi_config_dirs | dict2items }}"
+
+- name: Set NiFi home
+  ansible.builtin.lineinfile:
+    path: "/etc/environment"
+    line: "export NIFI_HOME={{ nifi_config_dirs.home }}"
+    create: true
+    mode: "0644"

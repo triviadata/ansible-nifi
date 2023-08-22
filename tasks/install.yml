@@ -1,13 +1,27 @@
 ---
+- name: Check if NiFi binary exists
+  ansible.builtin.stat:
+    path: "{{ nifi_config_dirs.binaries }}/nifi-{{ nifi_version }}-bin.tar.gz"
+  register: tar_file
+
+- name: Get NiFi binary checksum
+  ansible.builtin.uri:
+    url: "{{ download_mirror_uri }}/nifi/{{ nifi_version }}/nifi-{{ nifi_version }}-bin.tar.gz.sha256"
+    return_content: true
+  register: sha256_sum
+  when: not tar_file.stat.exists
+
 - name: Download NiFi binary
   ansible.builtin.get_url:
     url: "{{ download_mirror_uri }}/nifi/{{ nifi_version }}/nifi-{{ nifi_version }}-bin.zip"
-    dest: "/tmp/nifi-{{ nifi_version }}-bin.zip"
+    dest: "{{ nifi_config_dirs.binaries }}/nifi-{{ nifi_version }}-bin.tar.gz"
     mode: "0644"
+    checksum: "sha256:{{ sha256_sum }}"
+  when: not tar_file.stat.exists
 
 - name: Unpack NiFi binary
   ansible.builtin.unarchive:
-    remote_src: "yes"
+    remote_src: true
     src: "/tmp/nifi-{{ nifi_version }}-bin.zip"
     dest: "{{ nifi_config_dirs.install }}/"
     owner: "{{ nifi_user }}"
@@ -19,7 +33,7 @@
     path: "{{ nifi_config_dirs.install }}/nifi-{{ nifi_version }}"
     owner: "{{ nifi_user }}"
     group: "{{ nifi_group }}"
-    recurse: "yes"
+    recurse: true
 
 - name: Create NiFi symlink
   ansible.builtin.file:
@@ -28,20 +42,5 @@
     state: "link"
     owner: "{{ nifi_user }}"
     group: "{{ nifi_group }}"
-
-- name: Create directories
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: "directory"
-    owner: "{{ nifi_user }}"
-    group: "{{ nifi_group }}"
-    mode: "0755"
-  with_items:
-    - "{{ nifi_config_dirs.run }}"
-    - "{{ nifi_config_dirs.logs }}"
-
-- name: Set NiFi home
-  ansible.builtin.copy:
-    dest: "/etc/profile.d/nifi-home.sh"
-    content: "export NIFI_HOME={{ nifi_config_dirs.home }}"
-    mode: "0644"
+    follow: false
+    force: true

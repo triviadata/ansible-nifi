@@ -1,12 +1,4 @@
 ---
-- name: Create shared resources directory
-  ansible.builtin.file:
-    path: "{{ nifi_config_dirs.external_config }}"
-    state: "directory"
-    owner: "{{ nifi_user }}"
-    group: "{{ nifi_group }}"
-    mode: "0755"
-
 - name: Update nifi.properties
   ansible.builtin.lineinfile:
     path: "{{ nifi_config_dirs.home }}/conf/nifi.properties"

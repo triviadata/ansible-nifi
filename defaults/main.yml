@@ -36,6 +36,7 @@ bootstrap:
   java.arg.2: -Xms512m
   java.arg.3: -Xmx512m
 
+# Specify any property from nifi-env.sh here.
 nifi_env:
   NIFI_HOME: "{{ nifi_config_dirs.home }}"
 

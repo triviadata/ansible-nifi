@@ -44,11 +44,6 @@
 - name: Update login-identity-providers.xml
   when: login_identity_providers['/loginIdentityProviders/provider/identifier'] | length
   block:
-    - name: Uncomment block in login-identity-providers.xml
-      ansible.builtin.replace:
-        path: "{{ nifi_config_dirs.home }}/conf/login-identity-providers.xml"
-        regexp: "^.*To enable the {{ login_identity_providers['/loginIdentityProviders/provider/identifier'] }}.*$"
-        replace: ""
     - name: Update properties in login-identity-providers.xml
       community.general.xml:
         path: "{{ nifi_config_dirs.home }}/conf/login-identity-providers.xml"

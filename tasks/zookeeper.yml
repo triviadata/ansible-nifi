@@ -13,6 +13,14 @@
     dest: "{{ zookeeper.dataDir }}/myid"
     mode: "0644"
 
+- name: Create Zookeeper JAAS configuration
+  ansible.builtin.template:
+    src: zookeeper-jaas.conf.j2
+    dest: "{{ nifi_config_dirs.external_config }}/zookeeper-jaas.conf"
+    mode: "0644"
+  when:
+    - zookeeper_jaas | length
+
 - name: Update zookeeper.properties
   block:
     - name: Remove server line in zookeeper.properties
@@ -26,3 +34,4 @@
         line: "{{ item.key }}={{ item.value }}"
         regexp: "^{{ item.key }}"
       with_dict: "{{ zookeeper }}"
+  notify: Restart NiFi

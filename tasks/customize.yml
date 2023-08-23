@@ -1,18 +1,11 @@
 ---
-- name: Create shared resources directory
-  ansible.builtin.file:
-    path: "{{ nifi_config_dirs.external_config }}"
-    state: "directory"
-    owner: "{{ nifi_user }}"
-    group: "{{ nifi_group }}"
-    mode: "0755"
-
 - name: Update nifi.properties
   ansible.builtin.lineinfile:
     path: "{{ nifi_config_dirs.home }}/conf/nifi.properties"
     line: "{{ item.key }}={{ item.value }}"
     regexp: "^{{ item.key }}="
   with_dict: "{{ nifi_properties }}"
+  notify: Restart NiFi
 
 - name: Update bootstrap.conf
   ansible.builtin.lineinfile:
@@ -20,35 +13,45 @@
     line: "{{ item.key }}={{ item.value }}"
     regexp: "^{{ item.key }}="
   with_dict: "{{ bootstrap }}"
+  notify: Restart NiFi
+
+- name: Update nifi-env.sh
+  ansible.builtin.lineinfile:
+    path: "{{ nifi_config_dirs.home }}/bin/nifi-env.sh"
+    line: "export {{ item.key }}={{ item.value }}"
+    regexp: "^export {{ item.key }}="
+  with_dict: "{{ nifi_env }}"
+  notify: Restart NiFi
 
 - name: Update state-management.xml
   community.general.xml:
     path: "{{ nifi_config_dirs.home }}/conf/state-management.xml"
     xpath: "{{ item.key }}"
     value: "{{ item.value }}"
+    pretty_print: true
   with_dict: "{{ state_management }}"
+  notify: Restart NiFi
 
 - name: Update logback.xml
   community.general.xml:
     path: "{{ nifi_config_dirs.home }}/conf/logback.xml"
     xpath: "{{ item.key }}"
     value: "{{ item.value }}"
+    pretty_print: true
   with_dict: "{{ logback }}"
+  notify: Restart NiFi
 
 - name: Update login-identity-providers.xml
   when: login_identity_providers['/loginIdentityProviders/provider/identifier'] | length
   block:
-    - name: Uncomment block in login-identity-providers.xml
-      ansible.builtin.replace:
-        path: "{{ nifi_config_dirs.home }}/conf/login-identity-providers.xml"
-        regexp: "^.*To enable the {{ login_identity_providers['/loginIdentityProviders/provider/identifier'] }}.*$"
-        replace: ""
     - name: Update properties in login-identity-providers.xml
       community.general.xml:
         path: "{{ nifi_config_dirs.home }}/conf/login-identity-providers.xml"
         xpath: "{{ item.key }}"
         value: "{{ item.value }}"
+        pretty_print: true
       with_dict: "{{ login_identity_providers }}"
+      notify: Restart NiFi
 
 - name: Update authorizers.xml
   when: authorizers_identifiers | length
@@ -58,21 +61,15 @@
         path: "{{ nifi_config_dirs.home }}/conf/authorizers.xml"
         regexp: "^.*To enable the {{ item }}.*$"
         replace: ""
-      with_items: "{{ authorizers_identifiers }}"
+      loop: "{{ authorizers_identifiers }}"
     - name: Update properties in authorizers.xml
       community.general.xml:
         path: "{{ nifi_config_dirs.home }}/conf/authorizers.xml"
         xpath: "{{ item.key }}"
         value: "{{ item.value }}"
+        pretty_print: true
       with_dict: "{{ authorizers }}"
-
-- name: Create Zookeeper JAAS configuration
-  ansible.builtin.template:
-    src: zookeeper-jaas.conf.j2
-    dest: "{{ nifi_config_dirs.external_config }}/zookeeper-jaas.conf"
-    mode: "0644"
-  when:
-    - zookeeper_jaas | length
+      notify: Restart NiFi
 
 - name: Prepare Zookeeper
   ansible.builtin.include_tasks: zookeeper.yml

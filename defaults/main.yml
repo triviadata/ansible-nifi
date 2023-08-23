@@ -1,13 +1,14 @@
 ---
 nifi_version: 1.21.0
 
-# See https://www.apache.org/dyn/closer.lua to find mirrors
+# See https://www.apache.org/dyn/closer.lua to find mirrors or check archive https://archive.apache.org/dist
 download_mirror_uri: http://apache.cs.utah.edu
 
 nifi_user: nifi
 nifi_group: nifi
 
 nifi_config_dirs:
+  binaries: /tmp
   install: /opt/nifi/releases
   home: /opt/nifi/releases/current
   external_config: /opt/nifi/config_resources
@@ -33,8 +34,12 @@ nifi_properties:
 
 # Specify any property from bootstrap.conf here.
 bootstrap:
-  java.arg.2: -Xms512m
-  java.arg.3: -Xmx512m
+  java.arg.2: '-Xms512m'
+  java.arg.3: '-Xmx512m'
+
+# Specify any property from nifi-env.sh here.
+nifi_env:
+  NIFI_HOME: "{{ nifi_config_dirs.home }}"
 
 # Specify any property from logback.xml here.
 # Use XPath expressions as keys.
@@ -45,8 +50,8 @@ logback:
 # Specify any property from login-identity-providers.xml here.
 # Use XPath expressions as keys.
 login_identity_providers:
-  # Can be one of 'ldap-provider' or 'kerberos-provider'. Leave blank for no RBAC.
-  /loginIdentityProviders/provider/identifier: ""
+  /loginIdentityProviders/provider/identifier: single-user-provider
+  /loginIdentityProviders/provider/class: org.apache.nifi.authentication.single.user.SingleUserLoginIdentityProvider
 
 # Specify any property from state-management.xml here.
 # Use XPath expressions as keys.

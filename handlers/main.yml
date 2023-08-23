@@ -1,0 +1,5 @@
+---
+- name: Restart NiFi
+  ansible.builtin.service:
+    name: nifi
+    state: restarted

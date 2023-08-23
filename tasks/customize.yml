@@ -81,7 +81,6 @@
   when:
     - nifi_properties['nifi.state.management.embedded.zookeeper.start'] is defined
     - nifi_properties['nifi.state.management.embedded.zookeeper.start'] | bool
-  notify: Restart NiFi
 
 - name: Set NiFi variables in env.sh
   ansible.builtin.lineinfile:

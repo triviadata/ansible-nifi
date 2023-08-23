@@ -34,3 +34,4 @@
         line: "{{ item.key }}={{ item.value }}"
         regexp: "^{{ item.key }}"
       with_dict: "{{ zookeeper }}"
+  notify: Restart NiFi

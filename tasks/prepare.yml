@@ -19,6 +19,11 @@
     create_home: "no"
     system: true
 
+- name: Check if binaries (tmp) directory exists
+  ansible.builtin.stat:
+    path: "{{ nifi_config_dirs.binaries }}"
+  register: binaries_directory
+
 - name: Create NiFi directories
   ansible.builtin.file:
     path: "{{ item.value }}"
@@ -27,6 +32,7 @@
     group: "{{ nifi_group }}"
     mode: "0755"
   loop: "{{ nifi_config_dirs | dict2items }}"
+  when: "item.key != 'binaries' or (item.key == 'binaries' and not binaries_directory.stat.exists)"
 
 - name: Set NiFi home
   ansible.builtin.lineinfile:

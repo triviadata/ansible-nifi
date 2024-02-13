@@ -66,7 +66,8 @@ authorizers:
   /authorizers/accessPolicyProvider/property[@name="Authorizations File"]: "{{ nifi_config_dirs.external_config }}/authorizations.xml"
 
 # Specify idenfiers of different authorizers
-authorizers_identifiers: {}
+authorizers_identifiers:
+  - file-user-group-provider
 
 # The following zookeeper properties are only used if
 # nifi_properties.nifi.state.management.embedded.zookeeper.start == true

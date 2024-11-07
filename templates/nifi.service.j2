@@ -9,6 +9,9 @@ User={{ nifi_user }}
 Group={{ nifi_group }}
 ExecStart={{ nifi_config_dirs.home }}/bin/nifi.sh start
 ExecStop={{ nifi_config_dirs.home }}/bin/nifi.sh stop
+{% if restart_nifi | default(false) %}
+Restart=always
+{% endif %}
 
 [Install]
 WantedBy=multi-user.target

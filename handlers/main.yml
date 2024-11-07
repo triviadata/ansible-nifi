@@ -3,3 +3,4 @@
   ansible.builtin.service:
     name: nifi
     state: restarted
+  when: restart_nifi | bool

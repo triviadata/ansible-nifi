@@ -79,3 +79,6 @@ zookeeper:
 
 # Specify ZooKeeper JAAS properties
 zookeeper_jaas: {}
+
+# Set to true to enable automatic restarting of the NiFi service
+restart_nifi: true

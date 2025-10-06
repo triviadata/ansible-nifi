@@ -9,9 +9,9 @@
 
 - name: Get NiFi binary checksum
   ansible.builtin.uri:
-    url: "{{ download_mirror_uri }}/nifi/{{ nifi_version }}/nifi-{{ nifi_version }}-bin.zip.sha256"
+    url: "{{ download_mirror_uri }}/nifi/{{ nifi_version }}/nifi-{{ nifi_version }}-bin.zip.sha512"
     return_content: true
-  register: sha256_sum
+  register: sha512_sum
   when: not tar_file.stat.exists
 
 - name: Download NiFi binary
@@ -19,7 +19,7 @@
     url: "{{ download_mirror_uri }}/nifi/{{ nifi_version }}/nifi-{{ nifi_version }}-bin.zip"
     dest: "{{ nifi_config_dirs.binaries }}/nifi-{{ nifi_version }}-bin.zip"
     mode: "0644"
-    checksum: "sha256:{{ sha256_sum.content }}"
+    checksum: "sha512:{{ sha512_sum.content }}"
   when: not tar_file.stat.exists
 
 - name: Unpack NiFi binary

@@ -3,6 +3,7 @@ nifi_version: 1.21.0
 
 # See https://www.apache.org/dyn/closer.lua to find mirrors or check archive https://archive.apache.org/dist
 download_mirror_uri: http://apache.cs.utah.edu
+download_everytime: true
 
 nifi_user: nifi
 nifi_group: nifi

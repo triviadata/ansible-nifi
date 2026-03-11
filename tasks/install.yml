@@ -1,26 +1,19 @@
 ---
-- name: Check if NiFi binary exists
+- name: Check if NiFi install directory exists
   ansible.builtin.stat:
-    path: "{{ nifi_config_dirs.binaries }}/nifi-{{ nifi_version }}-bin.zip"
+    path: "{{ nifi_config_dirs.install }}/nifi-{{ nifi_version }}"
     get_attributes: false
     get_checksum: false
     get_mime: false
-  register: tar_file
-
-- name: Get NiFi binary checksum
-  ansible.builtin.uri:
-    url: "{{ download_mirror_uri }}/nifi/{{ nifi_version }}/nifi-{{ nifi_version }}-bin.zip.sha512"
-    return_content: true
-  register: sha512_sum
-  when: not tar_file.stat.exists
+  register: nifi_install_dir
 
 - name: Download NiFi binary
   ansible.builtin.get_url:
     url: "{{ download_mirror_uri }}/nifi/{{ nifi_version }}/nifi-{{ nifi_version }}-bin.zip"
     dest: "{{ nifi_config_dirs.binaries }}/nifi-{{ nifi_version }}-bin.zip"
     mode: "0644"
-    checksum: "sha512:{{ sha512_sum.content }}"
-  when: not tar_file.stat.exists
+    checksum: "sha512:{{ download_mirror_uri }}/nifi/{{ nifi_version }}/nifi-{{ nifi_version }}-bin.zip.sha512"
+  when: not nifi_install_dir.stat.exists or download_everytime
 
 - name: Unpack NiFi binary
   ansible.builtin.unarchive:
@@ -29,7 +22,7 @@
     dest: "{{ nifi_config_dirs.install }}/"
     owner: "{{ nifi_user }}"
     group: "{{ nifi_group }}"
-    creates: "{{ nifi_config_dirs.install }}/nifi-{{ nifi_version }}"
+  when: not nifi_install_dir.stat.exists
 
 - name: Fix permissions
   ansible.builtin.file:

@@ -1,8 +1,8 @@
 ---
-nifi_version: 1.21.0
+nifi_version: 2.9.0
 
 # See https://www.apache.org/dyn/closer.lua to find mirrors or check archive https://archive.apache.org/dist
-download_mirror_uri: http://apache.cs.utah.edu
+download_mirror_uri: https://archive.apache.org/dist
 download_everytime: true
 
 nifi_user: nifi
@@ -31,7 +31,6 @@ nifi_properties:
   nifi.content.repository.directory.default: "{{ nifi_config_dirs.external_config }}/content_repository"
   nifi.provenance.repository.directory.default: "{{ nifi_config_dirs.external_config }}/provenance_repository"
   nifi.security.user.login.identity.provider: "{{ login_identity_providers['/loginIdentityProviders/provider/identifier'] }}"
-  nifi.web.http.port: 8080
 
 # Specify any property from bootstrap.conf here.
 bootstrap:
@@ -44,9 +43,7 @@ nifi_env:
 
 # Specify any property from logback.xml here.
 # Use XPath expressions as keys.
-logback:
-  /configuration/appender[@name="APP_FILE"]/rollingPolicy/maxFileSize: 100MB
-  /configuration/appender[@name="APP_FILE"]/rollingPolicy/maxHistory: 30
+logback: {}
 
 # Specify any property from login-identity-providers.xml here.
 # Use XPath expressions as keys.

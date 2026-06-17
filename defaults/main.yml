@@ -84,3 +84,4 @@ zookeeper_jaas: {}
 # Specify restart option
 # Acceptable values: no, always, on-success, on-failure, on-abnormal, on-abort, on-watchdog
 nifi_systemd_restart: "no"
+nifi_systemd_name: nifi
